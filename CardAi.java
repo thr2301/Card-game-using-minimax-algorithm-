@@ -1,21 +1,19 @@
 public class CardAi {
-    // private int cards;// Μ
-    private int groups;// Κ
+    private int cards;// M
+    private int groups;// K
     private int[] numOfCards;// Α
     private int[] numOfRem;// Β
 
-    public CardAi(int groups, int[] numOfCards, int[] numOfRem) {
-        // this.cards = cards;
+    public CardAi(int cards, int groups, int[] numOfCards, int[] numOfRem) {
+        this.cards = cards;
         this.groups = groups;
         this.numOfCards = numOfCards;
         this.numOfRem = numOfRem;
     }
 
-    /*
-     * public int getCards() {
-     * return cards;
-     * }
-     */
+    public int getCards() {
+        return cards;
+    }
 
     public int getGroups() {
         return groups;
