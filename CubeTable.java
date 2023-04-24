@@ -1,63 +1,41 @@
+import java.util.*;
+
 public class CubeTable {
 
-    private final int N; // number of cubes
-    private final int K; // number of rows
-    private final int[][] state; // current state of the table
+    private int N;// number of cubes
+    private int K;// number of rows
+    private int[][] state;// current state of the table
 
     public CubeTable(int N, int K, int[][] state) {
         this.N = N;
         this.K = K;
-        this.state = new int[N][3];
+        this.state = new int[N][K];
         for (int i = 0; i < N; i++) {
             this.state[i] = state[i].clone();
         }
     }
 
-    public static boolean is_valid_state() {
-        // Check that each cube is placed on the table or on another cube
-        for (int i = 0; i < N; i++) {
-            int x = state[i][0];
-            int y = state[i][1];
-            int above = state[i][2];
-            if (y == 0 && above != -1) {
-                // Cube is on another cube but not on the table
-                return false;
-            }
-            if (y > 0 && above == -1) {
-                // Cube is on the table but not on another cube
-                return false;
-            }
-            if (y > 0 && above >= i) {
-                // Cube is on another cube but the index of the cube above it is
-                // greater than or equal to its own index, indicating a cycle
-                return false;
-            }
-        }
-        // Check that the coordinates of each cube satisfy the constraints
-        for (int i = 0; i < N; i++) {
-            int x = state[i][0];
-            int y = state[i][1];
-            if (x < 1 || x > K || y < 0 || y > 3) {
-                // Cube is outside the bounds of the table or the rows
-                return false;
-            }
-            if (y == 0 && x != i + 1) {
-                // Cube is on the table but not at its index + 1
-                return false;
-            }
-        }
-        // All constraints are satisfied
-        return true;
+    public int getN() {
+        return N;
     }
 
-    public static boolean is_free_cube(int cube) {
-        int index = getCubeIndex(state, cube);
+    public int getK() {
+        return K;
+    }
+
+    public int[][] getState() {
+        return state;
+    }
+
+    public boolean isFreeCube(int cube) {
+        int index = getCubeIndex(cube);
+        int N = state.length;
         int x = index / N;
         int y = index % N;
         return (y == N - 1) || (state[x][y + 1] == 0);
     }
 
-    public static int getCubeIndex(int cube) {
+    public int getCubeIndex(int cube) {
         int N = state.length;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
@@ -69,19 +47,88 @@ public class CubeTable {
         return -1; // cube not found
     }
 
-    public static double move_cost(int[] curr_pos, int[] next_pos) {
-        int curr_x = curr_pos[0], curr_y = curr_pos[1];
-        int next_x = next_pos[0], next_y = next_pos[1];
+    public double moveCost(int[] currPos, int[] nextPos) {
+        // int currX = currPos[0];
+        int currY = currPos[1];
+        // int nextX = nextPos[0];
+        int nextY = nextPos[1];
         double cost = 0.0;
-        if (next_y > curr_y) {
-            cost = next_y - curr_y;
-        } else if (next_y < curr_y) {
-            cost = 0.5 * (curr_y - next_y);
+        if (nextY > currY) {
+            cost = nextY - currY;
+        } else if (nextY < currY) {
+            cost = 0.5 * (currY - nextY);
         } else {
             cost = 0.75;
         }
         return cost;
     }
 
-    // other methods and fields as needed
+    public boolean isValidState() {
+        for (int i = 0; i < N; i++) {
+            int y = state[i][1];
+            int above = state[i][2];
+            if (y == 0 && above != 1) {
+                return false;
+            } else if (y > 0 && above == -1) {
+                return false;
+            } else if (y > 0 && above >= i) {
+                return false;
+            }
+
+        }
+        for (int i = 0; i < N; i++) {
+            int x = state[i][0];
+            int y = state[i][1];
+            if (x < 1 || x > K || y < 0 || y > 3) {
+                return false;
+            } else if (y == 0 && x != i + 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<Node> getNeighbors(Node node) {
+        List<Node> neighbors = new ArrayList<>();
+        CubeTable currState = node.getState();
+
+        // CubeTable currState = node.getState();
+        for (int i = 0; i < N; i++) {
+            if (isFreeCube(i)) {
+                int currIndex = getCubeIndex(i);
+                int currX = currIndex / N;
+                int currY = currIndex % N;
+                for (int j = 0; j < N; j++) {
+                    if (j != currIndex) {
+                        int nextX = j / N;
+                        int nextY = j % N;
+                        if (currState.state[nextX][nextY] == 0 || currState.state[nextX][nextY] == i) {
+                            int[][] nextState = new int[N][K];
+                            for (int k = 0; k < N; k++) {
+                                nextState[k] = currState.state[k].clone();
+                            }
+                            nextState[nextX][nextY] = i;
+                            if (currY == 0) {
+                                nextState[currX][currY] = 0;
+                            } else {
+                                int above = nextState[currX][currY + 1];
+                                nextState[currX][currY] = above;
+                                if (above == 0) {
+                                    nextState[currX][currY + 1] = -1;
+                                } else {
+                                    nextState[currX][currY + 1] = currState.state[currX][currY + 1];
+                                }
+                            }
+                            CubeTable neighborState = new CubeTable(N, K, nextState);
+                            double cost = moveCost(new int[] { currX, currY }, new int[] { nextX, nextY });
+                            Node neighborNode = new Node(neighborState, node, node.getCost() + cost);
+                            // Node neighborNode = new Node(neighborState, node, node.getCost() + cost);
+                            neighbors.add(neighborNode);
+                        }
+                    }
+                }
+            }
+        }
+        return neighbors;
+    }
 }
