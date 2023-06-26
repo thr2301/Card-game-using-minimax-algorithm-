@@ -1,7 +1,7 @@
 # Card-game-using-minimax-algorithm-for a University project
 
-## The problem 
-Build a program that will play the following game two against a user
+## The Game
+The implementation is a program that will play the following game two against a user
 players taking turns. There are M identical cards placed on a table which are
 divided into K groups. Each group Oi (i=1,…,K) initially has Ai≥2 cards. Obviously the sum of
 Ai is equal to M. The values of M, K and Ai are given at the start of the game.
