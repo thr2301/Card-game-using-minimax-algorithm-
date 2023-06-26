@@ -1,6 +1,4 @@
 
-//ATHANASIOS ROUDIS 5098 
-//STYLIANOS SIMANTIRAKIS 5127
 import java.util.*;
 
 public class MainGame {
